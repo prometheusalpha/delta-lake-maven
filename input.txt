@@ -1,0 +1,271 @@
+## 1. Chain of responsibility
+
+Imagine you are going to court. You want to sue someone. You start by suing them in your local court. If the local court cannot handle the case, it will forward the case to the higher court. The higher court will then decide whether to handle the case or forward it to the higher court. This is the chain of responsibility pattern.
+
+The main idea of the chain of responsibility pattern is to decouple the sender of a request from the receiver of the request by allowing more than one object to handle the request. Each object in the chain has a reference to the next object in the chain. The request is passed along the chain until an object handles it.
+
+If you take a closer look, you will realize that the logic can be implemented in a nested if-else. However, the chain of responsibility pattern allows you to change the chain dynamically at runtime. Moreover, you can pass the request to any object in the chain, instead of the first.
+
+Example:
+
+```java
+public interface Handler {
+    void setNext(Handler handler);
+    void handleRequest(Request request);
+}
+public class ConcreteHandler implements Handler {
+    private Handler next;
+    public void setNext(Handler handler) {
+        next = handler;
+    }
+    public void handleRequest(Request request) {
+        if (shouldForward(request)) {
+            next.handleRequest(request);
+        } else {
+            // handle the request
+        }
+    }
+    // other methods
+}
+public class Request {
+    // logic here
+}
+public class Main {
+    public static void main(String[] args) {
+        Handler handler1 = new ConcreteHandler();
+        Handler handler2 = new ConcreteHandler();
+        handler1.setNext(handler2);
+        Request request = new Request();
+        handler1.handleRequest(request);
+    }
+}
+```
+
+## 2. Command
+
+Imagine you are an manager. One day, you receive a request from your employee via an email. You decided to do the task. However, the next day, you receive another, similar request from your employee via a phone call. You, a bit annoyed, still decided to do the work. The next day, you receive another request from your employee via a text message. This goes on for a few days. You are annoyed by the requests that are very similar to each other, but is notified to you in different ways.
+
+Instead, you decided to ask your assistant to handle the requests. Your assistant will receive the requests and send them to you via email. You will then do the work. This is the command pattern.
+
+The main idea of the command pattern is to encapsulate a request as an object. This opens up a lot of possibilities: you can queue the requests, log the requests, undo the requests, etc. Furthermore, it decouples the invoker of the request from the business logic that handles the request.
+
+The implementation of the command pattern has the following parts:
+
+- Create the command interface with an `execute()` method.
+- Create the invoker class that store the reference to the command object and call the `execute()` method.
+- Create the command classes that implement the command interface. These classes store the reference to the receiver objects and call the appropriate method of the receiver on `execute()` method call.
+
+Example:
+
+```java
+public interface Command {
+    void execute();
+}
+public class ConcreteCommand implements Command {
+    private Receiver receiver;
+    public ConcreteCommand(Receiver receiver) {
+        this.receiver = receiver;
+    }
+    public void execute() {
+        receiver.action();
+    }
+}
+public class Receiver {
+    public void action() {
+        // logic here
+    }
+}
+public class Invoker {
+    private Command command;
+    public void setCommand(Command command) {
+        this.command = command;
+    }
+    public void executeCommand() {
+        command.execute();
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Receiver receiver = new Receiver();
+        Command command = new ConcreteCommand(receiver);
+        Invoker invoker = new Invoker();
+        invoker.setCommand(command);
+        invoker.executeCommand();
+    }
+}
+```
+
+## 3. Iterator
+
+Imagine you are visiting your friend's house. You want to see all the rooms in the house. However, you don't know the house is structured. You can try to guess the structure of the house and visit the rooms. If you guess wrong, you will have to go back to the starting point and try again, which is time consuming and annoying.
+Instead, you can ask your friend to guide you through the house. Your friend knows the structure of the house and can guide you to visit all the rooms.
+This is the iterator pattern.
+
+The main idea of the iterator pattern is to provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation. The iterator pattern essentially delegates the responsibility of accessing and traversing the elements of an aggregate object to that object itself.
+
+One of the advantages of the iterator pattern is that it decouples the algorithm for accessing and traversing the elements of an aggregate object from its underlying structure. Moreover, you can create different iterators for the same aggregate object, just like your friend can guide you through the house in different ways.
+
+Example:
+
+```java
+public interface Iterator {
+    boolean hasNext();
+    Object next();
+}
+public class Tree {
+    // logic here
+    public Iterator createIterator() {
+        // choose which iterator to return
+    }
+}
+public class TreeIterator implements Iterator {
+    // logic here
+}
+public class TreeIteratorPreOrder implements Iterator {
+    // logic here
+}
+public class Main{
+    public static void main(String[] args) {
+        Tree tree = new Tree();
+        Iterator iterator = tree.createIterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+    }
+}
+```
+
+4. Mediator
+
+Imagine you are in a group chat with your friends. You want to send a message to your friend. You can send the message directly to your friend. However, if you want to send the message to multiple friends, you will have to send the message to each of them. This is time consuming and annoying.
+Instead, you can send the message to the group chat. The group chat will send the message to all your friends. This is the mediator pattern.
+
+The main idea of the mediator pattern is to encapsulate the interaction between objects in a separate object and decouple the objects from each other. The objects only need to know the mediator object, instead of knowing each other. The mediator object knows the interaction between the objects and can easily change the interaction without changing the objects.
+
+The mediator pattern promotes the Single Responsibility Principle by keeping the interactions between objects in a distinct object. Moreover, the mediator pattern centralizes the control of the interaction between objects, making it easier to maintain and extend.
+
+The implementation of the mediator pattern has the following parts:
+
+- Create the mediator interface and implement it.
+- When an object wants to interact with other objects, it notifies the mediator object. The mediator then see which objects is involved in the interaction and executes the interaction.
+
+Example:
+
+```java
+public interface Mediator {
+    void notify(Component sender, String event);
+}
+public class ConcreteMediator implements Mediator {
+    Button button;
+    TextBox textBox;
+    public void register(Component component) {
+        if (component instanceof Button) {
+            button = (Button) component;
+        } else if (component instanceof TextBox) {
+            textBox = (TextBox) component;
+        }
+    }
+    public void notify(Component sender, String event) {
+        if (sender == button && event.equals("click")) {
+            // do something
+        } else if (sender == textBox && event.equals("click")) {
+            // do something
+        }
+    }
+}
+public class Component {
+    private Mediator mediator;
+    public Component(Mediator mediator) {
+        this.mediator = mediator;
+    }
+    public void click() {
+        mediator.notify(this, "click");
+    }
+}
+public class Button extends Component {
+    public Button(Mediator mediator) {
+        super(mediator);
+    }
+}
+public class TextBox extends Component {
+    public TextBox(Mediator mediator) {
+        super(mediator);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Mediator mediator = new ConcreteMediator();
+        Button button = new Button(mediator);
+        TextBox textBox = new TextBox(mediator);
+        mediator.register(button);
+        mediator.register(textBox);
+        button.click();
+    }
+}
+```
+
+Note that in this example, the concrete mediator knows the concrete components. This is not always the case. The concrete mediator can be decoupled from the concrete components by using the observer pattern.
+
+## 5. Memento
+
+Imagine you are working for an event organizer. You are organizing a big event. After the event is done, you must reorganize everything of the stage back to the original state. You can try to remember the original state and reorganize everything back to that state. However, this is time consuming and error prone. Furthermore, there are many things in the stage that you don't know how to reorganize. Instead, you can pay for the owner of the stage to reorganize everything back to the original state. This is the memento pattern.
+
+The main problem that this pattern solves is the broken responsibilities of the components. The components are trying to invade each other's privacy, and do things that they are not supposed to. The memento pattern solves this problem by delegating the responsibility of restoring the state of an object back to the object itself. The object can easily save and restore its state because it knows its own state. In fact, this is the only way to restore the state of an object without compromising security and privacy.
+
+So how does the memento pattern work? The memento pattern has the following parts:
+
+- The originator is the object that wants to save and restore its state.
+- The memento is the object that stores the state of the originator. The memento can only be accessed by the originator. This is usually done by making the memento an inner class of the originator.
+- The caretaker is the object that manages the memento. When the caretaker wants to save the state of the originator, it asks the originator to create a memento. When the caretaker wants to restore the state of the originator, it sends the memento back to the originator. The caretaker does not know what is inside the memento.
+
+Example:
+
+```java
+public class Originator {
+    private String state;
+    public void setState(String state) {
+        this.state = state;
+    }
+    public String getState() {
+        return state;
+    }
+    public Memento createMemento() {
+        return new Memento(state);
+    }
+    public void restoreMemento(Memento memento) {
+        state = memento.getState();
+    }
+    public class Memento {
+        private String state;
+        public Memento(String state) {
+            this.state = state;
+        }
+        public String getState() {
+            return state;
+        }
+    }
+}
+public class Caretaker {
+    private List<Originator.Memento> mementos = new ArrayList<>();
+    private Originator originator;
+    public void saveState() {
+        memento = originator.createMemento();
+        mememtos.add(memento);
+    }
+    public void restoreState() {
+        memento = mementos.getAndRemoveLast();
+        originator.restoreMemento(memento);
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Originator originator = new Originator();
+        Caretaker caretaker = new Caretaker();
+        originator.setState("state 1");
+        caretaker.saveState(originator);
+        originator.setState("state 2");
+        caretaker.restoreState(originator);
+        System.out.println(originator.getState());
+    }
+}
+```
